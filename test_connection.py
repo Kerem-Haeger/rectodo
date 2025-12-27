@@ -31,7 +31,7 @@ def main():
     }
 
     append_pipeline_row(new_row)
-    print("Row appended. Check your Google Sheet!")
+    print("Row appended.")
 
 
 if __name__ == "__main__":

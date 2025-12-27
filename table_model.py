@@ -13,7 +13,7 @@ class PipelineTableModel(QAbstractTableModel):
     """
     Table model for displaying pipeline items in a QTableView.
     """
-    
+
     COLUMNS = TABLE_COLUMNS
 
     def __init__(self, items: List[PipelineItem]):

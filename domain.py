@@ -13,6 +13,7 @@ FOLLOWUP_MAX_DAYS = 7
 
 # --- Helper functions for date parsing/formatting ---
 
+
 def _parse_date(value: str) -> Optional[date]:
     """
     Parse a YYYY-MM-DD string to date, or return None if empty/invalid.
@@ -46,6 +47,7 @@ def _format_datetime(value: Optional[datetime]) -> str:
 
 
 # --- Core domain model ---
+
 
 @dataclass
 class PipelineItem:
@@ -152,7 +154,9 @@ def pipeline_item_to_sheet(item: PipelineItem) -> Dict[str, str]:
 # --- Convenience filters for lists of items ---
 
 
-def filter_by_owner(items: List[PipelineItem], owner: str) -> List[PipelineItem]:
+def filter_by_owner(
+    items: List[PipelineItem], owner: str
+) -> List[PipelineItem]:
     return [i for i in items if i.owner == owner]
 
 

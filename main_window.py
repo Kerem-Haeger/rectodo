@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
     """
     Main application window for managing recruitment pipeline.
     """
-    
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle(f"RecToDo – {CURRENT_OWNER}'s Pipeline")
@@ -70,7 +70,7 @@ class MainWindow(QMainWindow):
     def _build_sidebar(self) -> QVBoxLayout:
         """
         Build the sidebar with navigation and actions.
-        
+
         Returns:
             QVBoxLayout containing sidebar widgets
         """
@@ -119,7 +119,7 @@ class MainWindow(QMainWindow):
     def _build_content_area(self) -> QVBoxLayout:
         """
         Build the main content area with KPIs, search, and table.
-        
+
         Returns:
             QVBoxLayout containing content widgets
         """
@@ -151,7 +151,7 @@ class MainWindow(QMainWindow):
     def _build_kpi_row(self) -> QHBoxLayout:
         """
         Build the KPI display row.
-        
+
         Returns:
             QHBoxLayout containing KPI labels
         """
@@ -179,7 +179,7 @@ class MainWindow(QMainWindow):
     def _get_selected_item(self) -> Optional[PipelineItem]:
         """
         Get the currently selected pipeline item from the table.
-        
+
         Returns:
             Selected PipelineItem or None if no selection
         """
@@ -225,7 +225,7 @@ class MainWindow(QMainWindow):
     def _on_theme_slider_changed(self, value: int):
         """
         Handle theme slider value changes.
-        
+
         Args:
             value: Slider value (0=light, 1=dark)
         """
@@ -238,7 +238,7 @@ class MainWindow(QMainWindow):
     def _filtered_items(self) -> List[PipelineItem]:
         """
         Get filtered items based on view mode and search query.
-        
+
         Returns:
             List of filtered PipelineItems
         """

@@ -10,10 +10,10 @@ from sheets_repo import get_pipeline_rows
 def load_items_for_owner(owner: str) -> List[PipelineItem]:
     """
     Load all active pipeline items for a specific owner from Google Sheets.
-    
+
     Args:
         owner: The owner name to filter by
-        
+
     Returns:
         List of active PipelineItems belonging to the owner
     """
@@ -26,10 +26,10 @@ def load_items_for_owner(owner: str) -> List[PipelineItem]:
 def kpi_counts(items: List[PipelineItem]) -> tuple[int, int, int, int]:
     """
     Calculate KPI counts for a list of pipeline items.
-    
+
     Args:
         items: List of pipeline items to count
-        
+
     Returns:
         Tuple of (green_count, yellow_count, red_count, total_count)
     """

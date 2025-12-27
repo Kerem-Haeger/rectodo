@@ -18,7 +18,7 @@ class AddCandidateDialog(QDialog):
     """
     Dialog for adding a new candidate or updating an existing one.
     """
-    
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Add / Update Candidate")
@@ -59,7 +59,7 @@ class AddCandidateDialog(QDialog):
     def get_data(self) -> dict:
         """
         Get the data entered in the dialog.
-        
+
         Returns:
             Dictionary containing all form field values
         """

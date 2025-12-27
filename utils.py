@@ -9,11 +9,11 @@ from domain import PipelineItem
 def merge_csv_field(existing: str, new_value: str) -> str:
     """
     Merge a new value into a comma-separated string, avoiding duplicates.
-    
+
     Args:
         existing: Existing comma-separated string
         new_value: New value to add
-        
+
     Returns:
         Updated comma-separated string with new value if not already present
     """
@@ -36,12 +36,12 @@ def find_candidate_by_name(
 ) -> Optional[PipelineItem]:
     """
     Find a candidate by name for a specific owner (case-insensitive).
-    
+
     Args:
         items: List of pipeline items to search
         owner: Owner name to filter by
         name: Candidate name to search for
-        
+
     Returns:
         The matching PipelineItem if found, None otherwise
     """

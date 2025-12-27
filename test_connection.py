@@ -21,7 +21,7 @@ def main():
         "client": "Test Client",
         "role": "Test Role",
         "stage": "sent",
-        "sent_at": now[:10],          # YYYY-MM-DD
+        "sent_at": now[:10],  # YYYY-MM-DD
         "last_contact_at": "",
         "next_action": "Follow up in a few days",
         "notes": "Created by test_connection.py",

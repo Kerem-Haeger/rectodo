@@ -253,6 +253,9 @@ class MainWindow(QMainWindow):
         sidebar.addSpacing(20)
         sidebar.addWidget(self.btn_add)
 
+        self.btn_log_contact = QPushButton("Log contact (today)")
+        sidebar.addWidget(self.btn_log_contact)
+
         # 🌗 Theme slider: 0 = light, 1 = dark
         theme_row = QHBoxLayout()
         theme_label = QLabel("Theme")
@@ -313,7 +316,48 @@ class MainWindow(QMainWindow):
         self.btn_my.clicked.connect(self._set_view_my)
         self.btn_overdue.clicked.connect(self._set_view_overdue)
         self.btn_add.clicked.connect(self._add_candidate)
+        self.btn_log_contact.clicked.connect(self._log_contact)
         self.search_edit.textChanged.connect(self._refresh_view)
+
+    def _get_selected_item(self) -> Optional[PipelineItem]:
+        index = self.table.currentIndex()
+        if not index.isValid():
+            return None
+        model = self.table.model()
+        if not hasattr(model, "items"):
+            return None
+        row = index.row()
+        if row < 0 or row >= len(model.items):
+            return None
+        return model.items[row]
+
+    def _log_contact(self):
+        item = self._get_selected_item()
+        if item is None:
+            QMessageBox.information(
+                self,
+                "No candidate selected",
+                "Please select a candidate in the table first.",
+            )
+            return
+
+        now = datetime.utcnow()
+        today = date.today()
+
+        # Update domain object
+        item.last_contact_at = today
+        item.updated_at = now
+
+        # Persist to Google Sheets
+        row_dict = pipeline_item_to_sheet(item)
+        update_pipeline_row(item.id, row_dict)
+
+        # Reload all items from Sheets (to keep things in sync) and refresh UI
+        self.all_items = load_items_for_owner(CURRENT_OWNER)
+        self._refresh_view()
+
+        # Optional UX: small confirmation
+        # QMessageBox.information(self, "Logged", f"Contact logged for {item.candidate_name}.")
 
         # Initial view
         self._refresh_view()

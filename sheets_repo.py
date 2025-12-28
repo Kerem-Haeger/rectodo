@@ -72,3 +72,22 @@ def update_pipeline_row(row_id: str, row: Dict[str, Any]) -> None:
     start = rowcol_to_a1(target_row_index, 1)
     end = rowcol_to_a1(target_row_index, len(header))
     worksheet.update(f"{start}:{end}", [values])
+
+
+def delete_pipeline_row(row_id: str) -> None:
+    """Delete a row (matched by 'id') from the pipeline tab."""
+    client = _get_client()
+    spreadsheet = client.open(SPREADSHEET_NAME)
+    worksheet = spreadsheet.worksheet(PIPELINE_TAB_NAME)
+
+    records = worksheet.get_all_records()
+    target_row_index = None  # 1-based index in sheet
+    for idx, rec in enumerate(records, start=2):  # data starts at row 2
+        if str(rec.get("id", "")) == str(row_id):
+            target_row_index = idx
+            break
+
+    if target_row_index is None:
+        raise ValueError(f"Row with id {row_id} not found in sheet")
+
+    worksheet.delete_rows(target_row_index)

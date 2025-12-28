@@ -9,6 +9,7 @@ from PySide6.QtGui import QColor
 
 from config import TABLE_COLUMNS
 from domain import PipelineItem
+from utils import format_date_uk
 
 
 class PipelineTableModel(QAbstractTableModel):
@@ -52,9 +53,7 @@ class PipelineTableModel(QAbstractTableModel):
             if col == 4:
                 return item.last_action_label
             if col == 5:
-                if item.next_check_at:
-                    return item.next_check_at.isoformat()
-                return ""
+                return format_date_uk(item.next_check_at)
             if col == 6:
                 days = item.days_until_next_check
                 return "" if days is None else str(days)

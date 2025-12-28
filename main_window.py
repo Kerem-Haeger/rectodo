@@ -3,7 +3,7 @@ Main application window for RecToDo.
 """
 
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import List, Optional
 
 from PySide6.QtCore import Qt, QModelIndex
@@ -29,7 +29,11 @@ from config import CURRENT_OWNER
 from data_loader import kpi_counts, load_items_for_owner
 from dialogs import AddCandidateDialog, CandidateActionsDialog
 from domain import PipelineItem, pipeline_item_to_sheet
-from sheets_repo import append_pipeline_row, update_pipeline_row
+from sheets_repo import (
+    append_pipeline_row,
+    delete_pipeline_row,
+    update_pipeline_row,
+)
 from table_model import PipelineTableModel
 from theme import apply_theme, ThemeMode
 from utils import find_candidate_by_name, merge_csv_field
@@ -73,6 +77,8 @@ class MainWindow(QMainWindow):
         self.btn_overdue = QPushButton("Overdue only")
         self.btn_add = QPushButton("Add candidate")
 
+        self.btn_overdue.setCheckable(True)
+
         sidebar.addWidget(self.btn_my)
         sidebar.addWidget(self.btn_overdue)
         sidebar.addSpacing(20)
@@ -94,7 +100,7 @@ class MainWindow(QMainWindow):
         sidebar.addStretch(1)
 
         self.btn_my.clicked.connect(self._set_view_my)
-        self.btn_overdue.clicked.connect(self._set_view_overdue)
+        self.btn_overdue.clicked.connect(self._toggle_overdue)
         self.btn_add.clicked.connect(self._add_candidate)
 
         sidebar_frame = QFrame()
@@ -135,6 +141,11 @@ class MainWindow(QMainWindow):
         search_row.addWidget(self.search_edit)
         content.addLayout(search_row)
 
+        # Status / busy message
+        self.status_label = QLabel()
+        self.status_label.setStyleSheet("color: #b08800;")
+        content.addWidget(self.status_label)
+
         self.table = QTableView()
         self.table.setSortingEnabled(True)
         self.table.horizontalHeader().setStretchLastSection(True)
@@ -144,6 +155,28 @@ class MainWindow(QMainWindow):
         content.addWidget(self.table)
 
         return content
+
+    def _set_busy(self, busy: bool, message: str = "") -> None:
+        app = QApplication.instance()
+        controls = [
+            self.btn_my,
+            self.btn_overdue,
+            self.btn_add,
+            self.theme_slider,
+            self.search_edit,
+            self.table,
+        ]
+        for c in controls:
+            c.setEnabled(not busy)
+
+        self.status_label.setText(message if busy else "")
+
+        if not app:
+            return
+        if busy:
+            app.setOverrideCursor(Qt.WaitCursor)
+        else:
+            app.restoreOverrideCursor()
 
     # ---- Theme ----
 
@@ -187,10 +220,16 @@ class MainWindow(QMainWindow):
 
     def _set_view_my(self):
         self.view_mode = "my"
+        self.btn_overdue.setChecked(False)
         self._refresh_view()
 
-    def _set_view_overdue(self):
-        self.view_mode = "overdue"
+    def _toggle_overdue(self):
+        if self.view_mode == "overdue":
+            self.view_mode = "my"
+            self.btn_overdue.setChecked(False)
+        else:
+            self.view_mode = "overdue"
+            self.btn_overdue.setChecked(True)
         self._refresh_view()
 
     def _get_selected_item(self) -> Optional[PipelineItem]:
@@ -223,12 +262,24 @@ class MainWindow(QMainWindow):
         dlg = CandidateActionsDialog(item, self)
         if dlg.exec() != QDialog.Accepted:
             if dlg.note_text:
+                self._set_busy(True, "Saving note...")
                 append_note(item, dlg.note_text)
                 row_dict = pipeline_item_to_sheet(item)
                 update_pipeline_row(item.id, row_dict)
                 self.all_items = load_items_for_owner(CURRENT_OWNER)
                 self._refresh_view()
+                self._set_busy(False)
             return
+
+        if dlg.remove_requested:
+            self._set_busy(True, "Removing candidate...")
+            delete_pipeline_row(item.id)
+            self.all_items = load_items_for_owner(CURRENT_OWNER)
+            self._refresh_view()
+            self._set_busy(False)
+            return
+
+        self._set_busy(True, "Updating candidate...")
 
         if dlg.selected_action is not None:
             apply_action(item, dlg.selected_action)
@@ -241,6 +292,7 @@ class MainWindow(QMainWindow):
 
         self.all_items = load_items_for_owner(CURRENT_OWNER)
         self._refresh_view()
+        self._set_busy(False)
 
     # ---- Add / update candidate ----
 
@@ -259,6 +311,8 @@ class MainWindow(QMainWindow):
             )
             return
 
+        self._set_busy(True, "Saving candidate...")
+
         self.all_items = load_items_for_owner(CURRENT_OWNER)
         existing = find_candidate_by_name(self.all_items, CURRENT_OWNER, name)
 
@@ -276,7 +330,7 @@ class MainWindow(QMainWindow):
                 sent_at=today,
                 last_action=None,
                 last_action_at=None,
-                next_check_at=None,
+                next_check_at=today + timedelta(days=3),
                 status="ACTIVE",
                 notes="",
                 created_at=now,
@@ -296,3 +350,4 @@ class MainWindow(QMainWindow):
             update_pipeline_row(existing.id, row_dict)
 
         self._refresh_view()
+        self._set_busy(False)

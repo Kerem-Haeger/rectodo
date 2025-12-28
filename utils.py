@@ -2,6 +2,7 @@
 Utility helpers for RecToDo.
 """
 
+from datetime import date
 from typing import List, Optional
 
 from domain import PipelineItem
@@ -31,3 +32,10 @@ def find_candidate_by_name(
         if item.owner == owner and item.candidate_name.strip().lower() == name:
             return item
     return None
+
+
+def format_date_uk(value: Optional[date]) -> str:
+    """Return dd.mm.yyyy for a date, empty string if missing."""
+    if not value:
+        return ""
+    return value.strftime("%d.%m.%Y")

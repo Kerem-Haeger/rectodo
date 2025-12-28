@@ -71,6 +71,7 @@ class CandidateActionsDialog(QDialog):
         self.resize(400, 250)
         self.selected_action: Optional[Action] = None
         self.note_text: str = ""
+        self.remove_requested: bool = False
 
         layout = QVBoxLayout(self)
 
@@ -100,8 +101,11 @@ class CandidateActionsDialog(QDialog):
         row3 = QHBoxLayout()
         btn_note = QPushButton("📝 Add note…")
         btn_done = QPushButton("🏁 Process finished")
+        btn_remove = QPushButton("🗑 Remove candidate")
+        btn_remove.setStyleSheet("background-color: #d9534f; color: white;")
         row3.addWidget(btn_note)
         row3.addWidget(btn_done)
+        row3.addWidget(btn_remove)
         layout.addLayout(row3)
 
         btn_cancel = QPushButton("Cancel")
@@ -125,6 +129,7 @@ class CandidateActionsDialog(QDialog):
         btn_done.clicked.connect(lambda: self._choose_action(Action.FINISHED))
         btn_cancel.clicked.connect(self.reject)
         btn_note.clicked.connect(self._add_note)
+        btn_remove.clicked.connect(self._request_remove)
 
     def _choose_action(self, action: Action):
         self.selected_action = action
@@ -142,3 +147,7 @@ class CandidateActionsDialog(QDialog):
                 self.note_text += "\n\n" + text.strip()
             else:
                 self.note_text = text.strip()
+
+    def _request_remove(self):
+        self.remove_requested = True
+        self.accept()
